@@ -13,6 +13,11 @@ const (
 	length   = int64(len(alphabet))
 )
 
+var (
+	ErrUrlNotFound  = errors.New("url not found")
+	ErrDuplicateUrl = errors.New("url with such SKU already exists")
+)
+
 type UrlService struct {
 	repo domain.UrlRepository
 }

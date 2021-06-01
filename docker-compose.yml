@@ -14,8 +14,24 @@ services:
       DATABASE_NAME: url-short
       DATABASE_USER: url-short
       DATABASE_PASSWORD: 1234
+      DATABASE_POSTGRES_ADDRESS: "url-short-postgres:5432"
     depends_on:
       - short-mongo
+      - short-postgres
+
+  short-postgres:
+    image: postgres
+    container_name: url-short-postgres
+    hostname: url-short-postgres
+    restart: always
+    ports:
+      - "5432:5432"
+    volumes:
+      - url-short-postgres-data:/var/lib/postgresql/data
+    environment:
+      POSTGRES_USER: url-short
+      POSTGRES_PASSWORD: 1234
+      POSTGRES_DB: url-short
 
   short-mongo:
     image: mongo:4.4
@@ -36,3 +52,4 @@ services:
 
 volumes:
   url-short-mongo-data:
+  url-short-postgres-data:

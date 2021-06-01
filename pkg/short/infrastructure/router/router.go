@@ -14,7 +14,7 @@ import (
 func Router(client *mongo.Client, collection *mongo.Collection) http.Handler {
 	router := mux.NewRouter()
 	api := router.PathPrefix("/api/v1/url").Subrouter()
-	repository := mongodb.NewUrlRepository(client, collection)
+	repository := postgres.New()
 	service := app.NewUrlService(repository)
 	controller := transport.NewUrlController(service)
 	api.HandleFunc("", middleware.DecodeCreateUrlRequest(controller.Create())).Methods(http.MethodPost)
