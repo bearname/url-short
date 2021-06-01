@@ -10,11 +10,11 @@ services:
       - 127.0.0.1:8000:8000
     environment:
       SERVE_REST_ADDRESS: ":8000"
-      DATABASE_ADDRESS: "shortener-mongo:27017"
+      DATABASE_ADDRESS: "short-mongo:27017"
       DATABASE_USER: url-short
       DATABASE_PASSWORD: 1234
     depends_on:
-      - shortener-mysql
+      - short-mysql
 
   shortener-mongo:
     image: mongo:4.4

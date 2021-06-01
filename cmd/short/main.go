@@ -2,20 +2,18 @@ package main
 
 import (
 	"context"
-	_ "github.com/go-sql-driver/mysql"
 	log "github.com/sirupsen/logrus"
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
 	"os"
 	//"go.mongodb.org/mongo-driver/mongo/readpref"
 	"time"
-
-	"github.com/bearname/url-short/pkg/shortener/infrastructure"
+	//"github.com/bearname/url-short/pkg/short/infrastructure"
 )
 
 func main() {
 	log.SetFormatter(&log.JSONFormatter{})
-	file, err := os.OpenFile("shortener.log", os.O_CREATE|os.O_APPEND|os.O_WRONLY, 0666)
+	file, err := os.OpenFile("short.log", os.O_CREATE|os.O_APPEND|os.O_WRONLY, 0666)
 	if err == nil {
 		log.SetOutput(file)
 		defer func(file *os.File) {
@@ -25,7 +23,6 @@ func main() {
 			}
 		}(file)
 	}
-
 
 	config, err := ParseConfig()
 	if err != nil {
