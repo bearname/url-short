@@ -1,10 +1,12 @@
 package domain
 
 import (
+	"go.mongodb.org/mongo-driver/bson/primitive"
 	"time"
 )
 
 type Url struct {
+	Id             primitive.ObjectID
 	OriginalUrl    string
 	CreationDate   string
 	ExpirationDate string

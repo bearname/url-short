@@ -2,12 +2,10 @@ package app
 
 import (
 	"errors"
-	"fmt"
 	"github.com/bearname/url-short/pkg/short/domain"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 	"math"
 	"strings"
-	"time"
 )
 
 const (
@@ -26,25 +24,31 @@ func NewUrlService(repo domain.UrlRepository) *UrlService {
 }
 
 func (s *UrlService) CreateUrl(originalUrl string, customAlias string) (string, error) {
-	i, err := s.repo.Create(originalUrl, customAlias)
-	if len(customAlias) != 0 {
-		return customAlias, err
+	id := primitive.NewObjectID()
+	short := s.encode(int64(id.Timestamp().Second()))
+	if len(customAlias) == 0 {
+		customAlias = short
 	}
-	short := s.encode(i)
+	_, err := s.repo.Create(id, originalUrl, customAlias)
+	if err != nil {
+		return "", nil
+	}
 	return short, nil
 }
 
 func (s *UrlService) ReadUrl(shortUrl string) (*domain.Url, error) {
-	decode, err := s.decode(shortUrl)
-	if err != nil {
-		return nil, err
-	}
+	//decode, err := s.decode(shortUrl)
+	//if err != nil {
+	//	return nil, err
+	//}
+	//
+	//unixTimeUTC := time.Unix(decode, 0)
+	//
+	//objectId := primitive.NewObjectIDFromTimestamp(unixTimeUTC)
+	//s2 := objectId.String()
+	//fmt.Println(s2)
 
-	unix := time.Unix(decode, 0)
-	objectId := primitive.NewObjectIDFromTimestamp(unix)
-	s2 := objectId.String()
-	fmt.Println(s2)
-	return s.repo.Read(s2)
+	return s.repo.Read(shortUrl)
 }
 
 func (s *UrlService) encode(number int64) string {

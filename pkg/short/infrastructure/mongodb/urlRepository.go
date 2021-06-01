@@ -23,10 +23,12 @@ func NewUrlRepository(client *mongo.Client, collection *mongo.Collection) *UrlRe
 	return u
 }
 
-func (r *UrlRepository) Create(originalUrl string, customAlias string) (int64, error) {
+func (r *UrlRepository) Create(id primitive.ObjectID, originalUrl string, customAlias string) (int64, error) {
 	now := time.Now()
 	expiration := now.AddDate(1, 0, 0)
+
 	url := domain.Url{
+		Id:             id,
 		OriginalUrl:    originalUrl,
 		CreationDate:   now.String(),
 		ExpirationDate: expiration.String(),
@@ -41,25 +43,25 @@ func (r *UrlRepository) Create(originalUrl string, customAlias string) (int64, e
 	}
 
 	fmt.Println("Inserted a single document: ", insertResult.InsertedID)
-	oid, ok := insertResult.InsertedID.(primitive.ObjectID)
-	if !ok {
-		return 0, err
-	}
+	//oid, ok := insertResult.InsertedID.(primitive.ObjectID)
+	//if !ok {
+	//	return 0, err
+	//}
 
-	return oid.Timestamp().Unix(), nil
+	return id.Timestamp().Unix(), nil
 }
 
-func (r *UrlRepository) Read(objectId string) (*domain.Url, error) {
+func (r *UrlRepository) Read(shortUrl string) (*domain.Url, error) {
 
 	//s := objectId.String()
-	result := r.collection.FindOne(context.Background(), bson.M{"_id": objectId})
-	url := domain.Url{}
-	err := result.Decode(url)
+	filter := bson.D{{"name", shortUrl}}
+	result := domain.Url{}
+	err := r.collection.FindOne(context.TODO(), filter).Decode(&result)
 	if err != nil {
 		fmt.Println(err)
 		return nil, err
 	}
 	fmt.Println(result)
 
-	return &url, nil
+	return &result, nil
 }
