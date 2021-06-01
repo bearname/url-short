@@ -1,0 +1,37 @@
+version: "3.3"
+
+services:
+  url-shorter-app:
+    container_name: "url-shorter-app"
+    build:
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - 127.0.0.1:8000:8000
+    environment:
+      SERVE_REST_ADDRESS: ":8000"
+      DATABASE_ADDRESS: "shortener-mongo:27017"
+      DATABASE_USER: url-shortener
+      DATABASE_PASSWORD: 1234
+    depends_on:
+      - shortener-mysql
+
+  shortener-mongo:
+    image: mongo:4.4
+    container_name: budget-mongo
+    hostname: budget-mongo
+    volumes:
+      - url-shortener-mongo-data:/data/db:rw
+    ports:
+      - 127.0.0.1:27017:27017
+    environment:
+      MONGO_INITDB_DATABASE: url-shortener
+      MONGO_INITDB_ROOT_USERNAME: url-shortener
+      MONGO_INITDB_ROOT_PASSWORD: 1234
+    healthcheck:
+      test: echo 'db.runCommand("ping").ok' | mongo 127.0.0.1:27017/budget-view --quiet
+      interval: 10s
+      timeout: 1s
+
+volumes:
+  url-shortener-mongo-data:
