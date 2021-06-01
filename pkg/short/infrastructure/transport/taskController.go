@@ -1,7 +1,7 @@
 package transport
 
 import (
-	"github.com/bearname/url-short/pkg/shortener/app"
+	"github.com/bearname/url-short/pkg/short/app"
 )
 
 type TaskController struct {
