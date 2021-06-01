@@ -1,20 +1,14 @@
-FROM golang:1.16 AS builder
-WORKDIR /go/src/todolist
+FROM golang:1.15.6 AS builder
+WORKDIR /go/src/url-short
 COPY go.mod go.sum ./
 RUN go mod download
 COPY . .
-WORKDIR /go/src/todolist/cmd/todo
-RUN CGO_ENABLED=0 GOOS=linux go build -a -installsuffix cgo -o /go/src/todolist/bin/todo
-RUN ls
+WORKDIR /go/src/url-short/cmd/short
+RUN CGO_ENABLED=0 GOOS=linux go build -a -installsuffix cgo -o /go/src/url-short/bin/short
 
 FROM alpine:3.12.3
-RUN adduser -D app-executor
-USER app-executor
 WORKDIR /app
-COPY --from=builder /go/src/todolist/bin/todo /app/todo
-COPY --from=builder /go/src/todolist/data/mysql/migrations/todo /app/migrtions
+COPY --from=builder /go/src/url-short/bin/short /app/short
 
-ENV DATABASE_MIGRATIONS_DIR=/app/migrations
-EXPOSE 8000
-
-ENTRYPOINT ["/app/todo"]
+EXPOSE 8080
+ENTRYPOINT ["/app/short"]

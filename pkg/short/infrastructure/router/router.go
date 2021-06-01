@@ -1,15 +1,24 @@
 package router
 
 import (
+	"github.com/bearname/url-short/pkg/short/app"
+	"github.com/bearname/url-short/pkg/short/infrastructure/middleware"
+	"github.com/bearname/url-short/pkg/short/infrastructure/mongodb"
+	"github.com/bearname/url-short/pkg/short/infrastructure/transport"
 	"github.com/gorilla/mux"
 	log "github.com/sirupsen/logrus"
+	"go.mongodb.org/mongo-driver/mongo"
 	"net/http"
 )
 
-func Router() http.Handler {
+func Router(client *mongo.Client, collection *mongo.Collection) http.Handler {
 	router := mux.NewRouter()
-	//subrouter := router.PathPrefix("/api/v1").Subrouter()
-
+	api := router.PathPrefix("/api/v1/url").Subrouter()
+	repository := mongodb.NewUrlRepository(client, collection)
+	service := app.NewUrlService(repository)
+	controller := transport.NewUrlController(service)
+	api.HandleFunc("", middleware.DecodeCreateUrlRequest(controller.Create())).Methods(http.MethodPost)
+	api.HandleFunc("/{shortUrl}", controller.Redirect()).Methods(http.MethodGet)
 	return logMiddleware(router)
 }
 

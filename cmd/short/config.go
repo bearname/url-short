@@ -7,9 +7,10 @@ import (
 	"os"
 )
 
-type config struct {
+type Config struct {
 	ServeRestAddress string
 	DbAddress        string
+	DbName           string
 	DbUser           string
 	DbPassword       string
 }
@@ -25,21 +26,23 @@ func parseEnvString(key string, err error) (string, error) {
 	return str, nil
 }
 
-func ParseConfig() (*config, error) {
+func ParseConfig() (*Config, error) {
 	var err error
 	serveRestAddress, err := parseEnvString("SERVE_REST_ADDRESS", err)
 	dbAddress, err := parseEnvString("DATABASE_ADDRESS", err)
+	dbName, err := parseEnvString("DATABASE_NAME", err)
 	dbUser, err := parseEnvString("DATABASE_USER", err)
 	dbPassword, err := parseEnvString("DATABASE_PASSWORD", err)
 
 	if err != nil {
-		log.Info("erro" + err.Error())
+		log.Info("error " + err.Error())
 		return nil, err
 	}
 
-	return &config{
+	return &Config{
 		serveRestAddress,
 		dbAddress,
+		dbName,
 		dbUser,
 		dbPassword,
 	}, nil
