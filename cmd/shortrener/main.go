@@ -33,7 +33,7 @@ func main() {
 	}
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 	defer cancel()
-	 mongo.Connect(ctx, options.Client().ApplyURI("mongodb://"+config.DbAddress))
+	mongo.Connect(ctx, options.Client().ApplyURI("mongodb://"+config.DbAddress))
 
 	//if done {
 	//	return
