@@ -26,6 +26,7 @@ func main() {
 		}(file)
 	}
 
+
 	config, err := ParseConfig()
 	if err != nil {
 		log.Info("Default settings" + err.Error())
