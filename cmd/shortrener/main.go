@@ -10,7 +10,7 @@ import (
 	//"go.mongodb.org/mongo-driver/mongo/readpref"
 	"time"
 
-	"github.com/bearname/url-shortener/pkg/shortener/infrastructure"
+	"github.com/bearname/url-short/pkg/shortener/infrastructure"
 )
 
 func main() {
@@ -33,6 +33,7 @@ func main() {
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 	defer cancel()
 	 mongo.Connect(ctx, options.Client().ApplyURI("mongodb://"+config.DbAddress))
+
 	//if done {
 	//	return
 	//}

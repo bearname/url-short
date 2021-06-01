@@ -11,22 +11,22 @@ services:
     environment:
       SERVE_REST_ADDRESS: ":8000"
       DATABASE_ADDRESS: "shortener-mongo:27017"
-      DATABASE_USER: url-shortener
+      DATABASE_USER: url-short
       DATABASE_PASSWORD: 1234
     depends_on:
       - shortener-mysql
 
   shortener-mongo:
     image: mongo:4.4
-    container_name: budget-mongo
-    hostname: budget-mongo
+    container_name: url-short-mongo
+    hostname: url-short-mongo
     volumes:
-      - url-shortener-mongo-data:/data/db:rw
+      - url-short-mongo-data:/data/db:rw
     ports:
       - 127.0.0.1:27017:27017
     environment:
-      MONGO_INITDB_DATABASE: url-shortener
-      MONGO_INITDB_ROOT_USERNAME: url-shortener
+      MONGO_INITDB_DATABASE: url-short
+      MONGO_INITDB_ROOT_USERNAME: url-short
       MONGO_INITDB_ROOT_PASSWORD: 1234
     healthcheck:
       test: echo 'db.runCommand("ping").ok' | mongo 127.0.0.1:27017/budget-view --quiet
@@ -34,4 +34,4 @@ services:
       timeout: 1s
 
 volumes:
-  url-shortener-mongo-data:
+  url-short-mongo-data:
