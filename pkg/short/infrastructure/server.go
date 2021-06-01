@@ -1,7 +1,7 @@
 package infrastructure
 
 import (
-	"github.com/berarname/url-short/pkg/shortener/infrastructure/router"
+	"github.com/bearname/url-short/pkg/short/infrastructure/router"
 	log "github.com/sirupsen/logrus"
 	"net/http"
 	"os"
