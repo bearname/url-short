@@ -1,8 +1,10 @@
 package util
 
-import "github.com/google/uuid"
+import (
+	"net/url"
+)
 
-func IsValidUUID(u string) bool {
-	_, err := uuid.Parse(u)
-	return err == nil
+func IsValidUrl(str string) bool {
+	u, err := url.Parse(str)
+	return err == nil && u.Scheme != "" && u.Host != ""
 }

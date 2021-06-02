@@ -1,14 +1,16 @@
-FROM golang:1.15.6 AS builder
-WORKDIR /go/src/url-short
-COPY go.mod go.sum ./
-RUN go mod download
-COPY . .
-WORKDIR /go/src/url-short/cmd/short
-RUN CGO_ENABLED=0 GOOS=linux go build -a -installsuffix cgo -o /go/src/url-short/bin/short
-
-FROM alpine:3.12.3
+FROM golang:1.16.2 as builder
 WORKDIR /app
-COPY --from=builder /go/src/url-short/bin/short /app/short
+COPY . .
+RUN CGO_ENABLED=0 GOOS=linux go build -ldflags="-w -s" -o ./bin/urlshort ./cmd/short
 
-EXPOSE 8080
-ENTRYPOINT ["/app/short"]
+######## Start a new stage #######
+FROM alpine:3.11.5
+RUN adduser -D app
+USER app
+
+COPY --from=builder /app/bin/urlshort /app/bin/
+
+WORKDIR /app/
+
+EXPOSE 8000
+CMD ["./bin/urlshort"]

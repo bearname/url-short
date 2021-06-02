@@ -1,6 +1,11 @@
 package domain
 
+type UrlParameter interface {
+	GetCustomAlias() string
+	GetOriginalUrl() string
+}
+
 type Service interface {
-	CreateUrl(originalUrl string, customAlias string) (string, error)
-	ReadUrl(shortUrl string) (*Url, error)
+	CreateShortUrl(parameter UrlParameter) (string, error)
+	FindUrl(shortUrl string) (*Url, error)
 }

@@ -1,4 +1,4 @@
-package infrastructure
+package postgres
 
 import (
 	"github.com/bearname/url-short/pkg/common/uuid"
@@ -12,11 +12,10 @@ import (
 const errUniqueConstraint = "23505"
 
 type rawUrl struct {
-	Id             string    `db:"id"`
-	OriginalUrl    string    `db:"original_url"`
-	CreationDate   time.Time `db:"creation_date"`
-	ExpirationDate time.Time `db:"expiration_date"`
-	CustomAlias    string    `db:"custom_alias"`
+	Id           string    `db:"id"`
+	OriginalUrl  string    `db:"original_url"`
+	CreationDate time.Time `db:"creation_date"`
+	Alias        string    `db:"alias"`
 }
 
 func (r *UrlRepositoryImpl) NextID() domain.UrlID {
@@ -35,12 +34,11 @@ func NewUrlRepository(connPool *pgx.ConnPool) *UrlRepositoryImpl {
 
 func (r *UrlRepositoryImpl) Create(item domain.Url) error {
 	_, err := r.connPool.Exec(
-		`INSERT INTO urls (id, original_url, expiration_date, custom_alis) 
-			 VALUES ($1, $2, $3, $4)`,
+		`INSERT INTO urls (id, original_url, alias) 
+			 VALUES ($1, $2, $3)`,
 		item.Id.String(),
 		item.OriginalUrl,
-		item.ExpirationDate,
-		item.CustomUrl)
+		item.Alias)
 
 	if err != nil {
 		pgErr, ok := err.(pgx.PgError)
@@ -54,13 +52,30 @@ func (r *UrlRepositoryImpl) Create(item domain.Url) error {
 
 func (r *UrlRepositoryImpl) FindById(id domain.UrlID) (*domain.Url, error) {
 	var raw rawUrl
-	query := `SELECT id, original_url, expiration_date, custom_alias
+	query := `SELECT id, original_url, alias
               FROM urls WHERE id = $1`
 	err := r.connPool.QueryRow(query, id.String()).Scan(
 		&raw.Id,
 		&raw.OriginalUrl,
-		&raw.ExpirationDate,
-		&raw.CustomAlias)
+		&raw.Alias)
+	if err != nil {
+		if err == pgx.ErrNoRows {
+			err = app.ErrUrlNotFound
+		}
+		return nil, errors.WithStack(err)
+	}
+
+	return mapToUrl(raw)
+}
+
+func (r *UrlRepositoryImpl) FindByAlias(alias string) (*domain.Url, error) {
+	var raw rawUrl
+	query := `SELECT id, original_url, alias
+              FROM urls WHERE alias = $1`
+	err := r.connPool.QueryRow(query, alias).Scan(
+		&raw.Id,
+		&raw.OriginalUrl,
+		&raw.Alias)
 	if err != nil {
 		if err == pgx.ErrNoRows {
 			err = app.ErrUrlNotFound
@@ -74,10 +89,9 @@ func (r *UrlRepositoryImpl) FindById(id domain.UrlID) (*domain.Url, error) {
 func mapToUrl(raw rawUrl) (*domain.Url, error) {
 	itemID, _ := uuid.FromString(raw.Id)
 	item := &domain.Url{
-		Id:             domain.UrlID(itemID),
-		CreationDate:   raw.CreationDate,
-		ExpirationDate: raw.ExpirationDate,
-		CustomUrl:      raw.CustomAlias,
+		Id:          domain.UrlID(itemID),
+		OriginalUrl: raw.OriginalUrl,
+		Alias:       raw.Alias,
 	}
 
 	return item, nil

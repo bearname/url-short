@@ -1,25 +1,36 @@
 package router
 
 import (
-	"github.com/bearname/url-short/pkg/short/app"
+	"fmt"
 	"github.com/bearname/url-short/pkg/short/infrastructure/middleware"
-	"github.com/bearname/url-short/pkg/short/infrastructure/mongodb"
 	"github.com/bearname/url-short/pkg/short/infrastructure/transport"
 	"github.com/gorilla/mux"
 	log "github.com/sirupsen/logrus"
-	"go.mongodb.org/mongo-driver/mongo"
 	"net/http"
 )
 
-func Router(client *mongo.Client, collection *mongo.Collection) http.Handler {
+func Router(controller *transport.UrlController) http.Handler {
 	router := mux.NewRouter()
+	router.Use(mux.CORSMethodMiddleware(router))
 	api := router.PathPrefix("/api/v1/url").Subrouter()
-	repository := postgres.New()
-	service := app.NewUrlService(repository)
-	controller := transport.NewUrlController(service)
+
+	router.HandleFunc("/health", healthCheckHandler).Methods(http.MethodGet)
+	router.HandleFunc("/ready", readyCheckHandler).Methods(http.MethodGet)
 	api.HandleFunc("", middleware.DecodeCreateUrlRequest(controller.Create())).Methods(http.MethodPost)
 	api.HandleFunc("/{shortUrl}", controller.Redirect()).Methods(http.MethodGet)
 	return logMiddleware(router)
+}
+
+func healthCheckHandler(w http.ResponseWriter, _ *http.Request) {
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(http.StatusOK)
+	_, _ = fmt.Fprint(w, "{\"status\": \"OK\"}")
+}
+
+func readyCheckHandler(w http.ResponseWriter, r *http.Request) {
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(http.StatusOK)
+	_, _ = fmt.Fprintf(w, "{\"host\": \"%v\"}", r.Host)
 }
 
 func logMiddleware(h http.Handler) http.Handler {

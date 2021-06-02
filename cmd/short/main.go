@@ -2,84 +2,58 @@ package main
 
 import (
 	"context"
-	"fmt"
+	"github.com/bearname/url-short/pkg/short/app"
 	"github.com/bearname/url-short/pkg/short/infrastructure"
+	"github.com/bearname/url-short/pkg/short/infrastructure/postgres"
+	"github.com/bearname/url-short/pkg/short/infrastructure/router"
+	"github.com/bearname/url-short/pkg/short/infrastructure/transport"
+	"github.com/jackc/pgx"
+	"github.com/pkg/errors"
 	log "github.com/sirupsen/logrus"
-	"go.mongodb.org/mongo-driver/mongo"
-	"go.mongodb.org/mongo-driver/mongo/options"
-	//"go.mongodb.org/mongo-driver/mongo/readpref"
+	"net"
+	"os"
 	"time"
-	//"github.com/bearname/url-short/pkg/short/infrastructure"
 )
 
-type Trainer struct {
-	Name string
-	Age  int
-	City string
-}
-
 func main() {
-	//log.SetFormatter(&log.JSONFormatter{})
-	//file, err := os.OpenFile("short.log", os.O_CREATE|os.O_APPEND|os.O_WRONLY, 0666)
-	//if err == nil {
-	//	log.SetOutput(file)
-	//	defer func(file *os.File) {
-	//		err := file.Close()
-	//		if err != nil {
-	//			log.Error(err)
-	//		}
-	//	}(file)
-	//}
-
-	//conf, err := ParseConfig()
-	//if err != nil {
-	//	log.Fatal("Default settings" + err.Error())
-	//}
-	conf := Config{
-		":8080",
-		"localhost:27017",
-		"url-short",
-		"url-short",
-		"1234",
+	log.SetFormatter(&log.JSONFormatter{})
+	file, err := os.OpenFile("short.log", os.O_CREATE|os.O_APPEND|os.O_WRONLY, 0666)
+	if err == nil {
+		log.SetOutput(file)
+		defer func(file *os.File) {
+			err := file.Close()
+			if err != nil {
+				log.Error(err)
+			}
+		}(file)
 	}
 
-	client, err := getConnector(&conf)
+	conf, err := ParseConfig()
 	if err != nil {
-		fmt.Println(err)
-		return
+		log.Fatal("Default settings" + err.Error())
 	}
-	err = client.Ping(context.TODO(), nil)
+	connector, err := getConnector(*conf)
 
 	if err != nil {
-		fmt.Println(err)
+		log.Fatal(err.Error())
 	}
+	pool, err := newConnectionPool(connector)
 
-	fmt.Println("Connected to MongoDB!")
-	collection := client.Database(conf.DbName).Collection("trainers")
-	//
-	//ash := Trainer{"Ash", 10, "Pallet Town"}
-	//insertResult, err := collection.InsertOne(context.TODO(), ash)
-	//if err != nil {
-	//	fmt.Println(err)
-	//}
-	//fmt.Println("Inserted a single document: ", insertResult.InsertedID)
-
-	//var result Trainer
-	//filter := bson.D{{"name", "Ash"}}
-	//err = collection.FindOne(context.TODO(), filter).Decode(&result)
-	//if err != nil {
-	//	fmt.Println(err)
-	//}
-
-	//fmt.Printf("Found a single document: %+v\n", result)
+	if err != nil {
+		log.Fatal(err.Error())
+	}
 
 	server := infrastructure.Server{}
 	killSignalChan := server.GetKillSignalChan()
+	repository := postgres.NewUrlRepository(pool)
+	service := app.NewUrlService(repository)
+	controller := transport.NewUrlController(service)
+	handler := router.Router(controller)
 
 	serverUrl := ":8000"
 	log.WithFields(log.Fields{"url": serverUrl}).Info("starting the server")
 
-	srv := server.StartServer(serverUrl, client, collection)
+	srv := server.StartServer(serverUrl, handler)
 
 	server.WaitForKillSignal(killSignalChan)
 	err = srv.Shutdown(context.Background())
@@ -87,21 +61,31 @@ func main() {
 		log.Error(err)
 		return
 	}
-	defer func(client *mongo.Client, ctx context.Context) {
-		err = client.Disconnect(ctx)
-		if err != nil {
-			fmt.Println(err)
-		}
-	}(client, context.TODO())
-	fmt.Println("Connection to MongoDB closed.")
 }
 
-func getConnector(config *Config) (*mongo.Client, error) {
-	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
-	defer cancel()
-	uri := "mongodb://" + config.DbUser + ":" + config.DbPassword + "@" +
-		config.DbAddress + "/" + config.DbName + "?authSource=admin"
-	u := "mongodb://url-short:1234@localhost:27017/url-short?authSource=admin"
-	fmt.Println(uri == u)
-	return mongo.Connect(ctx, options.Client().ApplyURI(uri))
+const maxConnections = 5
+const acquireTimeout = 1
+
+func getConnector(config Config) (pgx.ConnPoolConfig, error) {
+	databaseUri := "postgres://" + config.DbUser + ":" + config.DbPassword + "@" + config.DbAddress + "/" + config.DbName
+	log.Info("databaseUri: " + databaseUri)
+	pgxConnConfig, err := pgx.ParseURI(databaseUri)
+	if err != nil {
+		return pgx.ConnPoolConfig{}, errors.Wrap(err, "failed to parse database URI from environment variable")
+	}
+	pgxConnConfig.Dial = (&net.Dialer{Timeout: 10 * time.Second, KeepAlive: 5 * time.Minute}).Dial
+	pgxConnConfig.RuntimeParams = map[string]string{
+		"standard_conforming_strings": "on",
+	}
+	pgxConnConfig.PreferSimpleProtocol = true
+
+	return pgx.ConnPoolConfig{
+		ConnConfig:     pgxConnConfig,
+		MaxConnections: maxConnections,
+		AcquireTimeout: time.Duration(acquireTimeout) * time.Second,
+	}, nil
+}
+
+func newConnectionPool(config pgx.ConnPoolConfig) (*pgx.ConnPool, error) {
+	return pgx.NewConnPool(config)
 }

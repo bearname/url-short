@@ -1,4 +1,4 @@
-version: "3.3"
+version: "3.7"
 
 services:
   url-shorter-app:
@@ -10,46 +10,46 @@ services:
       - 127.0.0.1:8000:8000
     environment:
       SERVE_REST_ADDRESS: ":8000"
-      DATABASE_ADDRESS: "short-mongo:27017"
+      DATABASE_ADDRESS: "url-short-postgres:5432"
       DATABASE_NAME: url-short
       DATABASE_USER: url-short
       DATABASE_PASSWORD: 1234
-      DATABASE_POSTGRES_ADDRESS: "url-short-postgres:5432"
     depends_on:
-      - short-mongo
+      #      - short-mongo
       - short-postgres
 
   short-postgres:
-    image: postgres
+    image: postgres:10.5
     container_name: url-short-postgres
     hostname: url-short-postgres
     restart: always
     ports:
-      - "5432:5432"
+      - '5432:5432'
     volumes:
       - url-short-postgres-data:/var/lib/postgresql/data
+      - ./data/migrations/001_create_urls_table.up.sql:/docker-entrypoint-initdb.d/create_tables.sq
     environment:
       POSTGRES_USER: url-short
       POSTGRES_PASSWORD: 1234
       POSTGRES_DB: url-short
-
-  short-mongo:
-    image: mongo:4.4
-    container_name: url-short-mongo
-    hostname: url-short-mongo
-    volumes:
-      - url-short-mongo-data:/data/db:rw
-    ports:
-      - 127.0.0.1:27017:27017
-    environment:
-      MONGO_INITDB_DATABASE: url-short
-      MONGO_INITDB_ROOT_USERNAME: url-short
-      MONGO_INITDB_ROOT_PASSWORD: 1234
-    healthcheck:
-      test: echo 'db.runCommand("ping").ok' | mongo 127.0.0.1:27017/url-short --quiet
-      interval: 10s
-      timeout: 1s
+#
+#  short-mongo:
+#    image: mongo:4.4
+#    container_name: url-short-mongo
+#    hostname: url-short-mongo
+#    volumes:
+#      - url-short-mongo-data:/data/db:rw
+#    ports:
+#      - 127.0.0.1:27017:27017
+#    environment:
+#      MONGO_INITDB_DATABASE: url-short
+#      MONGO_INITDB_ROOT_USERNAME: url-short
+#      MONGO_INITDB_ROOT_PASSWORD: 1234
+#    healthcheck:
+#      test: echo 'db.runCommand("ping").ok' | mongo 127.0.0.1:27017/url-short --quiet
+#      interval: 10s
+#      timeout: 1s
 
 volumes:
-  url-short-mongo-data:
+  #  url-short-mongo-data:
   url-short-postgres-data:

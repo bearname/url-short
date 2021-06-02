@@ -1,7 +1,7 @@
 package domain
 
 import (
-	uuid "github.com/satori/go.uuid"
+	"github.com/google/uuid"
 	"time"
 )
 
@@ -11,18 +11,13 @@ func (u UrlID) String() string {
 	return uuid.UUID(u).String()
 }
 
-type Url struct {
-	Id             UrlID
-	OriginalUrl    string
-	CreationDate   time.Time
-	ExpirationDate time.Time
-	CustomUrl      string
+func (u UrlID) ID() uint32 {
+	return uuid.UUID(u).ID()
 }
 
-func NewUrl(originalUrl string, creationDate time.Time, expirationDate time.Time) *Url {
-	u := new(Url)
-	u.OriginalUrl = originalUrl
-	u.CreationDate = creationDate
-	u.ExpirationDate = expirationDate
-	return u
+type Url struct {
+	Id           UrlID
+	OriginalUrl  string
+	CreationDate time.Time
+	Alias        string
 }

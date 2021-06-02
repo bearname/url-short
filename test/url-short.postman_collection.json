@@ -1,0 +1,121 @@
+{
+	"info": {
+		"_postman_id": "3d11bdea-c779-4c05-bd5f-8890bdc7c13c",
+		"name": "url-short",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+	},
+	"item": [
+		{
+			"name": "add valid url without custom alias",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n    \"originalUrl\": \"https://www.google.ru/search?q=golang+byte+array+into+int64&newwindow=1&sxsrf=ALeKk0041kZllOm98UFXAE_c9daCiaKgrg%3A1622564587780&ei=6162YO2FL7HrrgSH2oboCg&oq=golang+byte+array+into+int64&gs_lcp=Cgdnd3Mtd2l6EAMyBggAEBYQHjoECCMQJzoHCAAQhwIQFDoFCAAQywE6AggAOggIABAIEA0QHjoGCAAQCBAeUNYqWJZeYNlfaABwAngAgAF4iAH6B5IBBDEzLjGYAQCgAQGgAQKqAQdnd3Mtd2l6wAEB&sclient=gws-wiz&ved=0ahUKEwitp4SP7PbwAhWxtYsKHQetAa0Q4dUDCA8&uact=5\",\r\n    \"customAlias\": \"\"\r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "http://localhost:8000/api/v1/url",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "8000",
+					"path": [
+						"api",
+						"v1",
+						"url"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "redirect",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "http://localhost:8000/api/v1/url/avito-u",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "8000",
+					"path": [
+						"api",
+						"v1",
+						"url",
+						"avito-u"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "add invalid url",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n    \"originalUrl\": \"https:/ /www.google.com\",\r\n    \"customAlias\": \"avito-auto-\"\r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "http://localhost:8000/api/v1/url",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "8000",
+					"path": [
+						"api",
+						"v1",
+						"url"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "add valid url with custom alias",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n    \"originalUrl\": \"https://www.google.ru/search?q=golang+byte+array+into+int64&newwindow=1&sxsrf=ALeKk0041kZllOm98UFXAE_c9daCiaKgrg%3A1622564587780&ei=6162YO2FL7HrrgSH2oboCg&oq=golang+byte+array+into+int64&gs_lcp=Cgdnd3Mtd2l6EAMyBggAEBYQHjoECCMQJzoHCAAQhwIQFDoFCAAQywE6AggAOggIABAIEA0QHjoGCAAQCBAeUNYqWJZeYNlfaABwAngAgAF4iAH6B5IBBDEzLjGYAQCgAQGgAQKqAQdnd3Mtd2l6wAEB&sclient=gws-wiz&ved=0ahUKEwitp4SP7PbwAhWxtYsKHQetAa0Q4dUDCA8&uact=5\",\r\n    \"customAlias\": \"avito-u\"\r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "http://localhost:8000/api/v1/url",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "8000",
+					"path": [
+						"api",
+						"v1",
+						"url"
+					]
+				}
+			},
+			"response": []
+		}
+	]
+}

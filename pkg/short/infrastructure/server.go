@@ -1,9 +1,7 @@
 package infrastructure
 
 import (
-	"github.com/bearname/url-short/pkg/short/infrastructure/router"
 	log "github.com/sirupsen/logrus"
-	"go.mongodb.org/mongo-driver/mongo"
 	"net/http"
 	"os"
 	"os/signal"
@@ -13,9 +11,8 @@ import (
 type Server struct {
 }
 
-func (s *Server) StartServer(serverUrl string, client *mongo.Client, collection *mongo.Collection) *http.Server {
-	router := router.Router(client, collection)
-	srv := &http.Server{Addr: serverUrl, Handler: router}
+func (s *Server) StartServer(serverUrl string, handler http.Handler) *http.Server {
+	srv := &http.Server{Addr: serverUrl, Handler: handler}
 	go func() {
 		log.Error(srv.ListenAndServe())
 	}()

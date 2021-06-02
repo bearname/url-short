@@ -1,0 +1,1 @@
+DELETE FROM urls WHERE id='dccb41d4-c392-11eb-b47d-e4e74940035b' OR id='df449603-c392-11eb-b47d-e4e74940035b' OR id='f868cfbc-c3aa-11eb-9c9b-0242ac1c0003';

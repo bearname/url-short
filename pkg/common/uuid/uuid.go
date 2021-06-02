@@ -1,6 +1,6 @@
 package uuid
 
-import uuid "github.com/satori/go.uuid"
+import "github.com/google/uuid"
 
 type UUID [16]byte
 
@@ -10,7 +10,7 @@ func (u UUID) String() string {
 }
 
 func FromString(input string) (u UUID, err error) {
-	impl, err := uuid.FromString(input)
+	impl, err := uuid.Parse(input)
 	if err != nil {
 		return u, err
 	}
@@ -19,6 +19,6 @@ func FromString(input string) (u UUID, err error) {
 }
 
 func Generate() UUID {
-	impl := uuid.NewV4()
+	impl, _ := uuid.NewUUID()
 	return UUID(impl)
 }

@@ -1,21 +1,21 @@
 package app
 
 import (
-	"errors"
 	"github.com/bearname/url-short/pkg/short/domain"
-	"go.mongodb.org/mongo-driver/bson/primitive"
-	"math"
+	"github.com/bearname/url-short/pkg/short/infrastructure/util"
+	"github.com/pkg/errors"
 	"strings"
 )
 
 const (
 	alphabet = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789"
-	length   = int64(len(alphabet))
+	length   = uint32(len(alphabet))
 )
 
 var (
 	ErrUrlNotFound  = errors.New("url not found")
-	ErrDuplicateUrl = errors.New("url with such SKU already exists")
+	ErrDuplicateUrl = errors.New("url with such OriginalUrl already exists")
+	ErrInvalidUrl   = errors.New("url not valid")
 )
 
 type UrlService struct {
@@ -28,35 +28,51 @@ func NewUrlService(repo domain.UrlRepository) *UrlService {
 	return u
 }
 
-func (s *UrlService) CreateUrl(originalUrl string, customAlias string) (string, error) {
-	id := primitive.NewObjectID()
-	short := s.encode(int64(id.Timestamp().Second()))
-	if len(customAlias) == 0 {
-		customAlias = short
+func (s *UrlService) CreateShortUrl(parameter domain.UrlParameter) (string, error) {
+	id := s.repo.NextID()
+
+	isValid := util.IsValidUrl(parameter.GetOriginalUrl())
+	if !isValid {
+		return "", ErrInvalidUrl
 	}
-	_, err := s.repo.Create(id, originalUrl, customAlias)
+
+	item := s.buildUrlItem(parameter, id)
+
+	err := s.repo.Create(item)
 	if err != nil {
-		return "", nil
+		return "", errors.WithStack(err)
 	}
-	return short, nil
+
+	return item.Alias, nil
 }
 
-func (s *UrlService) ReadUrl(shortUrl string) (*domain.Url, error) {
-	//decode, err := s.decode(shortUrl)
-	//if err != nil {
-	//	return nil, err
-	//}
-	//
-	//unixTimeUTC := time.Unix(decode, 0)
-	//
-	//objectId := primitive.NewObjectIDFromTimestamp(unixTimeUTC)
-	//s2 := objectId.String()
-	//fmt.Println(s2)
+func (s *UrlService) FindUrl(shortUrl string) (*domain.Url, error) {
+	id, err := s.repo.FindByAlias(shortUrl)
+	if err != nil {
+		return nil, ErrUrlNotFound
+	}
 
-	return s.repo.Read(shortUrl)
+	return id, nil
 }
 
-func (s *UrlService) encode(number int64) string {
+func (s *UrlService) buildUrlItem(parameter domain.UrlParameter, id domain.UrlID) domain.Url {
+	item := domain.Url{
+		Id:          id,
+		OriginalUrl: parameter.GetOriginalUrl(),
+		Alias:       parameter.GetCustomAlias(),
+	}
+
+	if len(parameter.GetCustomAlias()) == 0 {
+		shortAlias := s.createShortUrl(id.ID())
+		if len(item.Alias) == 0 {
+			item.Alias = shortAlias
+		}
+	}
+
+	return item
+}
+
+func (s *UrlService) createShortUrl(number uint32) string {
 	var encodedBuilder strings.Builder
 
 	for ; number > 0; number = number / length {
@@ -64,19 +80,4 @@ func (s *UrlService) encode(number int64) string {
 	}
 
 	return encodedBuilder.String()
-}
-
-func (s *UrlService) decode(encoded string) (int64, error) {
-	var number int64
-
-	for i, symbol := range encoded {
-		alphabeticPosition := strings.IndexRune(alphabet, symbol)
-
-		if alphabeticPosition == -1 {
-			return int64(alphabeticPosition), errors.New("invalid character: " + string(symbol))
-		}
-		number += int64(alphabeticPosition) * int64(math.Pow(float64(length), float64(i)))
-	}
-
-	return number, nil
 }
