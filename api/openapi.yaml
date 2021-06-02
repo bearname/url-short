@@ -1,0 +1,81 @@
+openapi: 3.0.3
+info:
+  title: HTTP service for URL shortening
+  description: HTTP service for URL shortening
+  version: 1.0.0
+servers:
+  - url: 'https://hostname/api/v1/urls'
+    description: Demo  URL shortening API
+paths:
+  /:
+    post:
+      tags:
+        - Url
+      summary: Add a new urls
+      operationId: add
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                originalUrl:
+                  type: string
+                customAlias:
+                  type: string
+                  maxLength: 256
+              required:
+                - originalUrl
+                - customAlias
+        required: true
+      responses:
+        "200":
+          description: 'Success result'
+        403:
+          description: 'Bad request'
+        409:
+          description: 'url with such OriginalUrl already exists'
+        default:
+          description: unexpected error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+  /{shortUrl}:
+    get:
+      tags:
+        - ShortUrlRedirect
+      summary: Redirect to short url
+      operationId: redirect
+      parameters:
+        - name: shortUrl
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        308:
+          description: 'redirect to original url'
+        403:
+          description: 'short url not present'
+        404:
+          description: 'url not found'
+        default:
+          description: unexpected error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+components:
+  schemas:
+    Error:
+      required:
+        - code
+        - message
+      type: object
+      properties:
+        code:
+          type: integer
+          format: int32
+        message:
+          type: string
