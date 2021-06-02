@@ -40,6 +40,9 @@ func (s *UrlService) CreateShortUrl(parameter domain.UrlParameter) (string, erro
 
 	err := s.repo.Create(item)
 	if err != nil {
+		if err.Error() == "url with such OriginalUrl already exists" {
+			return "", ErrDuplicateUrl
+		}
 		return "", errors.WithStack(err)
 	}
 

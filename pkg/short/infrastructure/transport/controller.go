@@ -52,6 +52,6 @@ func (c *UrlController) Redirect() func(http.ResponseWriter, *http.Request) {
 			return
 		}
 
-		http.Redirect(writer, request, url.OriginalUrl, http.StatusTemporaryRedirect)
+		http.Redirect(writer, request, url.OriginalUrl, http.StatusPermanentRedirect)
 	}
 }

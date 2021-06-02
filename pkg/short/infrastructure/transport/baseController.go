@@ -73,6 +73,14 @@ func (c *BaseController) translateError(err error) transportError {
 				Message: err.Error(),
 			},
 		}
+	} else if errors.Is(err, app.ErrInvalidUrl) {
+		return transportError{
+			Status: http.StatusBadRequest,
+			Response: errorResponse{
+				Code:    104,
+				Message: err.Error(),
+			},
+		}
 	}
 
 	return transportError{
