@@ -1,0 +1,18 @@
+phantom:
+  address: 127.0.0.1:8000
+  ssl: false
+  load_profile:
+    load_type: rps
+    schedule: const(10, 1m)
+  uris:
+    - "/api/v1/urls/iW3Qce"
+    - "/api/v1/urls/WnRdfe"
+    - "/api/v1/urls/jvdFfe"
+    - "/api/v1/urls/avito-auto-be"
+    - "/api/v1/urls/avito-auto-"
+    - "/api/v1/urls/avito-u"
+
+console:
+  enabled: true
+telegraf:
+  enabled: false

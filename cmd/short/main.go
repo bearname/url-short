@@ -11,36 +11,29 @@ import (
 	"github.com/pkg/errors"
 	log "github.com/sirupsen/logrus"
 	"net"
+	"os"
 	"time"
 )
 
 func main() {
-	//log.SetFormatter(&log.JSONFormatter{})
-	//file, err := os.OpenFile("short.log", os.O_CREATE|os.O_APPEND|os.O_WRONLY, 0666)
-	//if err == nil {
-	//	log.SetOutput(file)
-	//	defer func(file *os.File) {
-	//		err := file.Close()
-	//		if err != nil {
-	//			log.Error(err)
-	//		}
-	//	}(file)
-	//}
-
-	//conf, err := ParseConfig()
-	//if err != nil {
-	//	log.Fatal("Default settings" + err.Error())
-	//}
-	conf := Config{
-		":8000",
-		"localhost:5432",
-		"urlshort",
-		"postgres",
-		"postgres",
-		150,
-		1,
+	log.SetFormatter(&log.JSONFormatter{})
+	file, err := os.OpenFile("short.log", os.O_CREATE|os.O_APPEND|os.O_WRONLY, 0666)
+	if err == nil {
+		log.SetOutput(file)
+		defer func(file *os.File) {
+			err := file.Close()
+			if err != nil {
+				log.Error(err)
+			}
+		}(file)
 	}
-	connector, err := getConnector(conf)
+
+	conf, err := ParseConfig()
+	if err != nil {
+		log.Fatal("Default settings" + err.Error())
+	}
+
+	connector, err := getConnector(*conf)
 
 	if err != nil {
 		log.Fatal(err.Error())
