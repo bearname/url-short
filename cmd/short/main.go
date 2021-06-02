@@ -50,10 +50,9 @@ func main() {
 	controller := transport.NewUrlController(service)
 	handler := router.Router(controller)
 
-	serverUrl := ":8000"
-	log.WithFields(log.Fields{"url": serverUrl}).Info("starting the server")
+	log.WithFields(log.Fields{"url": conf.ServeRestAddress}).Info("starting the server")
 
-	srv := server.StartServer(serverUrl, handler)
+	srv := server.StartServer(conf.ServeRestAddress, handler)
 
 	server.WaitForKillSignal(killSignalChan)
 	err = srv.Shutdown(context.Background())
