@@ -11,28 +11,36 @@ import (
 	"github.com/pkg/errors"
 	log "github.com/sirupsen/logrus"
 	"net"
-	"os"
 	"time"
 )
 
 func main() {
-	log.SetFormatter(&log.JSONFormatter{})
-	file, err := os.OpenFile("short.log", os.O_CREATE|os.O_APPEND|os.O_WRONLY, 0666)
-	if err == nil {
-		log.SetOutput(file)
-		defer func(file *os.File) {
-			err := file.Close()
-			if err != nil {
-				log.Error(err)
-			}
-		}(file)
-	}
+	//log.SetFormatter(&log.JSONFormatter{})
+	//file, err := os.OpenFile("short.log", os.O_CREATE|os.O_APPEND|os.O_WRONLY, 0666)
+	//if err == nil {
+	//	log.SetOutput(file)
+	//	defer func(file *os.File) {
+	//		err := file.Close()
+	//		if err != nil {
+	//			log.Error(err)
+	//		}
+	//	}(file)
+	//}
 
-	conf, err := ParseConfig()
-	if err != nil {
-		log.Fatal("Default settings" + err.Error())
+	//conf, err := ParseConfig()
+	//if err != nil {
+	//	log.Fatal("Default settings" + err.Error())
+	//}
+	conf := Config{
+		":8000",
+		"localhost:5432",
+		"urlshort",
+		"postgres",
+		"postgres",
+		150,
+		1,
 	}
-	connector, err := getConnector(*conf)
+	connector, err := getConnector(conf)
 
 	if err != nil {
 		log.Fatal(err.Error())
@@ -62,9 +70,6 @@ func main() {
 	}
 }
 
-const maxConnections = 5
-const acquireTimeout = 1
-
 func getConnector(config Config) (pgx.ConnPoolConfig, error) {
 	databaseUri := "postgres://" + config.DbUser + ":" + config.DbPassword + "@" + config.DbAddress + "/" + config.DbName
 	log.Info("databaseUri: " + databaseUri)
@@ -80,8 +85,8 @@ func getConnector(config Config) (pgx.ConnPoolConfig, error) {
 
 	return pgx.ConnPoolConfig{
 		ConnConfig:     pgxConnConfig,
-		MaxConnections: maxConnections,
-		AcquireTimeout: time.Duration(acquireTimeout) * time.Second,
+		MaxConnections: config.MaxConnections,
+		AcquireTimeout: time.Duration(config.AcquireTimeout) * time.Second,
 	}, nil
 }
 
