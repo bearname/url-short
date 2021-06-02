@@ -47,25 +47,8 @@ func (r *UrlRepositoryImpl) Create(item domain.Url) error {
 		}
 		return errors.WithStack(err)
 	}
+
 	return nil
-}
-
-func (r *UrlRepositoryImpl) FindById(id domain.UrlID) (*domain.Url, error) {
-	var raw rawUrl
-	query := `SELECT id, original_url, alias
-              FROM urls WHERE id = $1`
-	err := r.connPool.QueryRow(query, id.String()).Scan(
-		&raw.Id,
-		&raw.OriginalUrl,
-		&raw.Alias)
-	if err != nil {
-		if err == pgx.ErrNoRows {
-			err = app.ErrUrlNotFound
-		}
-		return nil, errors.WithStack(err)
-	}
-
-	return mapToUrl(raw)
 }
 
 func (r *UrlRepositoryImpl) FindByAlias(alias string) (*domain.Url, error) {

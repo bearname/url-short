@@ -21,3 +21,7 @@ type Url struct {
 	CreationDate time.Time
 	Alias        string
 }
+
+func (u *Url) String() string {
+	return u.Id.String() + "," + u.OriginalUrl + "," + u.CreationDate.String() + "," + u.Alias
+}

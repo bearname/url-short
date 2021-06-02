@@ -29,13 +29,12 @@ func NewUrlService(repo domain.UrlRepository) *UrlService {
 }
 
 func (s *UrlService) CreateShortUrl(parameter domain.UrlParameter) (string, error) {
-	id := s.repo.NextID()
-
 	isValid := util.IsValidUrl(parameter.GetOriginalUrl())
 	if !isValid {
 		return "", ErrInvalidUrl
 	}
 
+	id := s.repo.NextID()
 	item := s.buildUrlItem(parameter, id)
 
 	err := s.repo.Create(item)
@@ -50,12 +49,12 @@ func (s *UrlService) CreateShortUrl(parameter domain.UrlParameter) (string, erro
 }
 
 func (s *UrlService) FindUrl(shortUrl string) (*domain.Url, error) {
-	id, err := s.repo.FindByAlias(shortUrl)
+	urlToRedirect, err := s.repo.FindByAlias(shortUrl)
 	if err != nil {
 		return nil, ErrUrlNotFound
 	}
 
-	return id, nil
+	return urlToRedirect, nil
 }
 
 func (s *UrlService) buildUrlItem(parameter domain.UrlParameter, id domain.UrlID) domain.Url {

@@ -5,6 +5,13 @@ type CreateUrlRequest struct {
 	OriginalUrl string `json:"originalUrl"`
 }
 
+func NewCreateUrlRequest(customAlias string, originalUrl string) *CreateUrlRequest {
+	c := new(CreateUrlRequest)
+	c.CustomAlias = customAlias
+	c.OriginalUrl = originalUrl
+	return c
+}
+
 func (r *CreateUrlRequest) GetCustomAlias() string {
 	return r.CustomAlias
 }
