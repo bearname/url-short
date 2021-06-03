@@ -17,7 +17,6 @@ services:
       DATABASE_ACQUIRE_TIMEOUT: 1
       DATABASE_MAX_CONNECTION: 10
     depends_on:
-      #      - short-mongo
       - short-postgres
 
   short-postgres:
@@ -34,24 +33,6 @@ services:
       POSTGRES_USER: url-short
       POSTGRES_PASSWORD: 1234
       POSTGRES_DB: url-short
-#
-#  short-mongo:
-#    image: mongo:4.4
-#    container_name: url-short-mongo
-#    hostname: url-short-mongo
-#    volumes:
-#      - url-short-mongo-data:/data/db:rw
-#    ports:
-#      - 127.0.0.1:27017:27017
-#    environment:
-#      MONGO_INITDB_DATABASE: url-short
-#      MONGO_INITDB_ROOT_USERNAME: url-short
-#      MONGO_INITDB_ROOT_PASSWORD: 1234
-#    healthcheck:
-#      test: echo 'db.runCommand("ping").ok' | mongo 127.0.0.1:27017/url-short --quiet
-#      interval: 10s
-#      timeout: 1s
 
 volumes:
-  #  url-short-mongo-data:
   url-short-postgres-data:

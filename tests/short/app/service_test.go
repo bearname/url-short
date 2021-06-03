@@ -6,7 +6,7 @@ import (
 	"github.com/bearname/url-short/pkg/short/app"
 	"github.com/bearname/url-short/pkg/short/domain"
 	"github.com/bearname/url-short/pkg/short/infrastructure/transport"
-	"github.com/bearname/url-short/test/short/app/mocks"
+	"github.com/bearname/url-short/tests/short/app/mocks"
 	"github.com/golang/mock/gomock"
 	"github.com/stretchr/testify/assert"
 	"testing"
@@ -21,6 +21,10 @@ func TestUrlService_CreateShortUrl_ErrInvalidUrl(t *testing.T) {
 
 	shortUrl, err := appointmentService.CreateShortUrl(&parameter)
 	assert.Equal(t, 0, len(shortUrl), "invalid actualShortUrl")
+	if err == nil {
+		t.Error("Invalid error")
+		return
+	}
 	assert.Equal(t, app.ErrInvalidUrl, err, "error not matching. expect app.ErrInvalidUrl, actual "+err.Error())
 }
 
@@ -44,6 +48,10 @@ func TestUrlService_CreateShortUrl_ErrDuplicateUrl(t *testing.T) {
 	shortUrl, err := appointmentService.CreateShortUrl(&request)
 
 	assert.Equal(t, 0, len(shortUrl), "invalid actualShortUrl")
+	if err != nil {
+		t.Error("Invalid error")
+		return
+	}
 	assert.Equal(t, app.ErrDuplicateUrl, err, "error not matching. expect '"+app.ErrDuplicateUrl.Error()+"', actual '"+err.Error()+"'")
 }
 
@@ -68,6 +76,10 @@ func TestUrlService_CreateShortUrl_DatabaseError(t *testing.T) {
 	shortUrl, err := appointmentService.CreateShortUrl(&request)
 
 	assert.Equal(t, 0, len(shortUrl), "invalid actualShortUrl")
+	if err == nil {
+		t.Error("Invalid error")
+		return
+	}
 	assert.NotEqual(t, initialError.Error(), err, "error not matching. expect '"+app.ErrDuplicateUrl.Error()+"', actual '"+err.Error()+"'")
 }
 
@@ -108,6 +120,10 @@ func TestUrlService_FindByUrl_ErrUrlNotFound(t *testing.T) {
 	appointmentService := app.NewUrlService(mockAppointmentRepo)
 	urlRedirect, err := appointmentService.FindUrl(shortUrl)
 
+	if err != nil {
+		t.Error("Invalid error")
+		return
+	}
 	assert.Equal(t, app.ErrUrlNotFound, err, "error not matching. expect '"+app.ErrUrlNotFound.Error()+"', actual '"+err.Error()+"'")
 	assert.Nil(t, urlRedirect, "invalid url redirect")
 }
@@ -130,8 +146,12 @@ func TestUrlService_FindByUrl_Valid(t *testing.T) {
 	appointmentService := app.NewUrlService(mockAppointmentRepo)
 	actualUrl, err := appointmentService.FindUrl(shortUrl)
 
+	if actualUrl == nil {
+		t.Error("actualUrl must be not nil")
+		return
+	}
 	assert.Equal(t, expectedUrl.OriginalUrl, actualUrl.OriginalUrl, "original url not match")
-	assert.Equal(t, expectedUrl.Alias, actualUrl.Alias, "Alias url not match")
+	assert.Equal(t, expectedUrl.Alias, actualUrl.Alias, "alias url not match")
 	if err != nil {
 		t.Error("error must be nil, but "+err.Error(), err)
 	}
