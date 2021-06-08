@@ -2,7 +2,7 @@ package transport
 
 import (
 	"encoding/json"
-	"github.com/bearname/url-short/pkg/short/app"
+	"github.com/bearname/url-short/internal/short/app"
 	"github.com/pkg/errors"
 	log "github.com/sirupsen/logrus"
 	"net/http"
@@ -19,9 +19,9 @@ type BaseController struct {
 func (c *BaseController) WriteError(w http.ResponseWriter, err error) {
 	log.Error(err.Error())
 	w.Header().Set("Content-Type", "application/json; charset=utf-8")
-	var errorResponse = c.translateError(err)
-	w.WriteHeader(errorResponse.Status)
-	_ = json.NewEncoder(w).Encode(errorResponse.Response)
+	var response = c.translateError(err)
+	w.WriteHeader(response.Status)
+	_ = json.NewEncoder(w).Encode(response.Response)
 }
 
 func (c *BaseController) SetupCors(w *http.ResponseWriter, _ *http.Request) {

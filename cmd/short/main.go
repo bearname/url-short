@@ -2,38 +2,48 @@ package main
 
 import (
 	"context"
-	"github.com/bearname/url-short/pkg/short/app"
-	"github.com/bearname/url-short/pkg/short/infrastructure"
-	"github.com/bearname/url-short/pkg/short/infrastructure/postgres"
-	"github.com/bearname/url-short/pkg/short/infrastructure/router"
-	"github.com/bearname/url-short/pkg/short/infrastructure/transport"
+	"github.com/bearname/url-short/internal/short/app"
+	"github.com/bearname/url-short/internal/short/infrastructure"
+	"github.com/bearname/url-short/internal/short/infrastructure/postgres"
+	"github.com/bearname/url-short/internal/short/infrastructure/router"
+	"github.com/bearname/url-short/internal/short/infrastructure/transport"
 	"github.com/jackc/pgx"
 	"github.com/pkg/errors"
 	log "github.com/sirupsen/logrus"
 	"net"
-	"os"
 	"time"
 )
 
 func main() {
-	log.SetFormatter(&log.JSONFormatter{})
-	file, err := os.OpenFile("short.log", os.O_CREATE|os.O_APPEND|os.O_WRONLY, 0666)
-	if err == nil {
-		log.SetOutput(file)
-		defer func(file *os.File) {
-			err := file.Close()
-			if err != nil {
-				log.Error(err)
-			}
-		}(file)
+	//runtime.GOMAXPROCS(4)
+	//log.SetFormatter(&log.JSONFormatter{})
+	//file, err := os.OpenFile("short.log", os.O_CREATE|os.O_APPEND|os.O_WRONLY, 0666)
+	//if err == nil {
+	//	log.SetOutput(file)
+	//	defer func(file *os.File) {
+	//		err := file.Close()
+	//		if err != nil {
+	//			log.Error(err)
+	//		}
+	//	}(file)
+	//}
+
+	//conf, err := ParseConfig()
+	//if err != nil {
+	//	log.Fatal("Default settings" + err.Error())
+	//}
+
+	conf := Config{
+		ServeRestAddress: ":8000",
+		DbAddress:        "localhost:5432",
+		DbName:           "urlshort",
+		DbUser:           "postgres",
+		DbPassword:       "postgres",
+		MaxConnections:   10,
+		AcquireTimeout:   1,
 	}
 
-	conf, err := ParseConfig()
-	if err != nil {
-		log.Fatal("Default settings" + err.Error())
-	}
-
-	connector, err := getConnector(*conf)
+	connector, err := getConnector(conf)
 
 	if err != nil {
 		log.Fatal(err.Error())

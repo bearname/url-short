@@ -1,8 +1,9 @@
 package app
 
 import (
-	"github.com/bearname/url-short/pkg/short/domain"
-	"github.com/bearname/url-short/pkg/short/infrastructure/util"
+	"github.com/bearname/url-short/internal/short/domain"
+	"github.com/bearname/url-short/internal/short/infrastructure/util"
+	"github.com/google/uuid"
 	"github.com/pkg/errors"
 	"strings"
 )
@@ -65,7 +66,10 @@ func (s *UrlService) buildUrlItem(parameter domain.UrlParameter, id domain.UrlID
 	}
 
 	if len(parameter.GetCustomAlias()) == 0 {
-		shortAlias := s.createShortUrl(id.ID())
+		//shortAlias := id.String()
+		newUUID, _ := uuid.NewUUID()
+		shortAlias := s.createShortUrl(id.ID()) + s.createShortUrl(newUUID.ID())
+
 		if len(item.Alias) == 0 {
 			item.Alias = shortAlias
 		}

@@ -23,11 +23,15 @@ build-docker:
 
 .PHONY: run
 run:
-	docker-compose up
+  docker-compose up
 
 .PHONY: run-docker
 run-docker:
 	docker run -p 8000:8000 url-short
+
+.PHONY: run-go
+run-go:
+        bin/short/short.exe
 
 .PHONY: stop
 stop-docker:

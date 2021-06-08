@@ -2,10 +2,10 @@ package app
 
 import (
 	"errors"
-	"github.com/bearname/url-short/pkg/common/uuid"
-	"github.com/bearname/url-short/pkg/short/app"
-	"github.com/bearname/url-short/pkg/short/domain"
-	"github.com/bearname/url-short/pkg/short/infrastructure/transport"
+	"github.com/bearname/url-short/internal/common/uuid"
+	"github.com/bearname/url-short/internal/short/app"
+	"github.com/bearname/url-short/internal/short/domain"
+	"github.com/bearname/url-short/internal/short/infrastructure/transport"
 	"github.com/bearname/url-short/tests/short/app/mocks"
 	"github.com/golang/mock/gomock"
 	"github.com/stretchr/testify/assert"

@@ -1,7 +1,7 @@
 package app
 
 import (
-	"github.com/bearname/url-short/pkg/short/domain"
+	"github.com/bearname/url-short/internal/short/domain"
 	"github.com/stretchr/testify/assert"
 	"testing"
 	"time"

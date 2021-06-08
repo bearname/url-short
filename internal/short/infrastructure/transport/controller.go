@@ -1,10 +1,12 @@
 package transport
 
 import (
-	"github.com/bearname/url-short/pkg/short/app"
-	"github.com/bearname/url-short/pkg/short/domain"
-	"github.com/gorilla/context"
+	"encoding/json"
+	"github.com/bearname/url-short/internal/short/app"
+	"github.com/bearname/url-short/internal/short/domain"
+	"github.com/bearname/url-short/internal/short/infrastructure/util"
 	"github.com/gorilla/mux"
+	log "github.com/sirupsen/logrus"
 	"net/http"
 )
 
@@ -21,19 +23,34 @@ func NewUrlController(service *app.UrlService) *UrlController {
 
 func (c *UrlController) Create() func(http.ResponseWriter, *http.Request) {
 	return func(writer http.ResponseWriter, request *http.Request) {
-		url, ok := context.Get(request, "url").(CreateUrlRequest)
-		if !ok {
-			c.BaseController.WriteError(writer, ErrBadRequest)
+		log.Println("DecodeCreateUrlRequest")
+		var urlRequest CreateUrlRequest
+		err := json.NewDecoder(request.Body).Decode(&urlRequest)
+		if err != nil {
+			http.Error(writer, "customAlias or originalUrl not present on json", http.StatusBadRequest)
 			return
 		}
 
-		shortUrl, err := c.service.CreateShortUrl(&url)
+		b := !util.IsValidUrl(urlRequest.GetOriginalUrl())
+		if b {
+			http.Error(writer, "invalid original url", http.StatusBadRequest)
+			return
+		}
+
+		//context.Set(request, "url", urlRequest)
+		//url, ok := context.Get(request, "url").(CreateUrlRequest)
+		//if !ok {
+		//	c.BaseController.WriteError(writer, ErrBadRequest)
+		//	return
+		//}
+
+		shortUrl, err := c.service.CreateShortUrl(&urlRequest)
 		if err != nil {
 			c.BaseController.WriteError(writer, err)
 			return
 		}
 
-		c.WriteJsonResponse(writer, CreateUrlResponse{"http://" + request.Host + "/api/v1/url/" + shortUrl})
+		c.BaseController.WriteJsonResponse(writer, CreateUrlResponse{"http://" + request.Host + "/api/v1/url/" + shortUrl})
 	}
 }
 

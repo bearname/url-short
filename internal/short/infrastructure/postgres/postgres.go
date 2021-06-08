@@ -1,11 +1,12 @@
 package postgres
 
 import (
-	"github.com/bearname/url-short/pkg/common/uuid"
-	"github.com/bearname/url-short/pkg/short/app"
-	"github.com/bearname/url-short/pkg/short/domain"
+	"github.com/bearname/url-short/internal/common/uuid"
+	"github.com/bearname/url-short/internal/short/app"
+	"github.com/bearname/url-short/internal/short/domain"
 	"github.com/jackc/pgx"
 	"github.com/pkg/errors"
+	log "github.com/sirupsen/logrus"
 	"time"
 )
 
@@ -42,6 +43,7 @@ func (r *UrlRepositoryImpl) Create(item domain.Url) error {
 
 	if err != nil {
 		pgErr, ok := err.(pgx.PgError)
+		log.Info(pgErr.Code)
 		if ok && pgErr.Code == errUniqueConstraint {
 			return app.ErrDuplicateUrl
 		}

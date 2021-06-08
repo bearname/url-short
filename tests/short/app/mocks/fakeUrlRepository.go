@@ -1,7 +1,7 @@
 package mocks
 
 import (
-	domain "github.com/bearname/url-short/pkg/short/domain"
+	domain "github.com/bearname/url-short/internal/short/domain"
 	gomock "github.com/golang/mock/gomock"
 	reflect "reflect"
 )

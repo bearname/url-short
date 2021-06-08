@@ -2,8 +2,8 @@ package middleware
 
 import (
 	"encoding/json"
-	"github.com/bearname/url-short/pkg/short/infrastructure/transport"
-	"github.com/bearname/url-short/pkg/short/infrastructure/util"
+	"github.com/bearname/url-short/internal/short/infrastructure/transport"
+	"github.com/bearname/url-short/internal/short/infrastructure/util"
 	"github.com/gorilla/context"
 	log "github.com/sirupsen/logrus"
 	"net/http"
@@ -24,9 +24,8 @@ func DecodeCreateUrlRequest(next http.HandlerFunc) http.HandlerFunc {
 			http.Error(writer, "invalid original url", http.StatusBadRequest)
 			return
 		}
-		context.Set(request, "url", urlRequest)
 
-		log.Println("success")
+		context.Set(request, "url", urlRequest)
 
 		next(writer, request)
 	}
